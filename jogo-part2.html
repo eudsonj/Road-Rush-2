@@ -45,7 +45,7 @@
 
   /* Logo do menu */
   .gameLogo{
-    width:min(320px,80vw);
+    width:min(280px,70vw);
     height:auto;
     border-radius:22px;
     filter:drop-shadow(0 14px 40px rgba(120,80,255,.6));
@@ -54,6 +54,12 @@
   @keyframes logoPulse{
     0%,100%{transform:scale(1)}
     50%{transform:scale(1.035)}
+  }
+
+  /* Título quando aparece abaixo da logo */
+  #menu h1{
+    font-size:clamp(28px,8vw,48px);
+    margin-top:-4px;
   }
 
   .sub{margin:0;opacity:.65;font-size:13px;letter-spacing:2px;text-transform:uppercase}
@@ -145,6 +151,7 @@
 
   <div class="overlay" id="menu">
     <img src="logo.png" alt="RoadRush 2" class="gameLogo" />
+    <h1>ROADRUSH 2</h1>
     <p class="sub">5 Pistas · Contramão · Biomas · Nitro</p>
     <div class="row" id="modeRow"></div>
     <button class="btn big" id="btnPlay">▶ JOGAR</button>
