@@ -5,12 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
 <title>RoadRush 2 — Biomas, Temporais e Nitro</title>
 
-<!-- ===== FAVICON ===== -->
-<link rel="icon" type="image/png" sizes="32x32" href="logo.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="logo.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="logo.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="logo.png" />
-<link rel="shortcut icon" href="logo.png" />
+<!-- FAVICON SVG INLINE (sempre funciona) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234cc9f0'/%3E%3Cstop offset='50%25' stop-color='%23b5179e'/%3E%3Cstop offset='100%25' stop-color='%23ff7b00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%230a0d1c'/%3E%3Crect x='2' y='2' width='60' height='60' rx='12' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Cpath d='M10 50 L54 50 L40 20 L24 20 Z' fill='%233a3f4a'/%3E%3Cline x1='32' y1='48' x2='32' y2='24' stroke='%23ffd60a' stroke-width='2' stroke-dasharray='4 3'/%3E%3Crect x='22' y='30' width='20' height='18' rx='4' fill='%23e63946'/%3E%3Crect x='24' y='32' width='16' height='6' rx='2' fill='%237fd0ff'/%3E%3Crect x='26' y='44' width='4' height='3' fill='%23fff8c0'/%3E%3Crect x='34' y='44' width='4' height='3' fill='%23fff8c0'/%3E%3Ctext x='32' y='60' font-family='Arial' font-size='14' font-weight='bold' text-anchor='middle' fill='%23ffd60a'%3E2%3C/text%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0d1c'/%3E%3Ctext x='32' y='42' font-family='Arial' font-size='32' font-weight='bold' text-anchor='middle' fill='%23e63946'%3ER2%3C/text%3E%3C/svg%3E" />
 <meta name="theme-color" content="#05060a" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -42,8 +39,6 @@
     animation:hue 5s linear infinite;text-shadow:0 0 30px rgba(120,80,255,.35);
   }
   @keyframes hue{to{background-position:300% 0}}
-
-  /* Logo do menu */
   .gameLogo{
     width:min(280px,70vw);
     height:auto;
@@ -55,13 +50,10 @@
     0%,100%{transform:scale(1)}
     50%{transform:scale(1.035)}
   }
-
-  /* Título quando aparece abaixo da logo */
   #menu h1{
     font-size:clamp(28px,8vw,48px);
     margin-top:-4px;
   }
-
   .sub{margin:0;opacity:.65;font-size:13px;letter-spacing:2px;text-transform:uppercase}
   h2{margin:0 0 4px;font-size:22px;letter-spacing:2px;color:#4cc9f0}
   .btn{
@@ -150,7 +142,7 @@
   <canvas id="cv"></canvas>
 
   <div class="overlay" id="menu">
-    <img src="logo.png" alt="RoadRush 2" class="gameLogo" />
+    <img src="logo.png" alt="RoadRush 2" class="gameLogo" onerror="this.style.display='none'" />
     <h1>ROADRUSH 2</h1>
     <p class="sub">5 Pistas · Contramão · Biomas · Nitro</p>
     <div class="row" id="modeRow"></div>
@@ -227,7 +219,6 @@
 (function(){
 'use strict';
 
-/* ====================== CONSTANTES ====================== */
 const W=480, H=800;
 const ROAD_L=52, ROAD_R=428, ROAD_W=ROAD_R-ROAD_L;
 const LANES=[
@@ -259,7 +250,6 @@ function shade(hex,amt){
 }
 function rgba(hex,a){const [r,g,b]=hexToRgb(hex);return `rgba(${r},${g},${b},${a})`;}
 
-/* ====================== CANVAS ====================== */
 const cv=document.getElementById('cv');
 const ctx=cv.getContext('2d');
 let scale=1, offX=0, offY=0;
@@ -275,7 +265,6 @@ function resize(){
 window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,120));
 
-/* ====================== HELPERS ====================== */
 function rr(c,x,y,w,h,r){
   r=Math.min(r,Math.abs(w)/2,Math.abs(h)/2);
   c.beginPath();
@@ -328,7 +317,6 @@ function drawCarTop(c,x,y,w,h,color,opt){
   c.restore();
 }
 
-/* ====================== ÁUDIO ====================== */
 const AudioSys={
   actx:null, on:true,
   init(){ if(!this.actx){ try{ this.actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ this.on=false; } } },
@@ -356,7 +344,6 @@ const AudioSys={
   thunder(){ this.blip(70,0.7,'sawtooth',0.1); }
 };
 
-/* ====================== DADOS ====================== */
 const CARS=[
   {id:'fusca',  name:'Fusquinha',   price:0,    spd:0.90, acc:0.90, grip:1.15, nitroCap:1.00, w:44,h:80, stripe:false},
   {id:'hatch',  name:'Hatch Turbo', price:0,    spd:1.00, acc:1.00, grip:1.00, nitroCap:1.00, w:44,h:82, stripe:true},
@@ -439,7 +426,6 @@ const CHALLENGE_POOL=[
   {id:'c10',stat:'drift',    n:8,   reward:190, text:'Faça {n} derrapagens'},
 ];
 
-/* ====================== SAVE ====================== */
 const SAVE_KEY='roadrush2_save_v2';
 const DEFAULT_SAVE={
   coins:0, best:0, mode:'infinito',
@@ -466,7 +452,6 @@ function persist(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }c
 save=loadSave();
 AudioSys.on=!save.muted;
 
-/* ====================== ESTADO ====================== */
 const G={
   running:false, paused:false, over:false,
   t:0, scroll:0, dist:0, speed:180,
@@ -489,7 +474,6 @@ function getCar(){ return CARS.find(c=>c.id===save.car)||CARS[1]; }
 function getNitroDef(){ return NITROS.find(n=>n.id===save.nitro)||NITROS[0]; }
 function getMode(){ return MODES.find(m=>m.id===G.mode)||MODES[0]; }
 
-/* ====================== INPUT ====================== */
 const keys={left:false,right:false,up:false,down:false,nitro:false};
 let touchActive=false, touchX=W/2, touchNitro=false;
 
@@ -533,19 +517,16 @@ if('ontouchstart' in window){
   document.getElementById('touchCtl').style.display='block';
 }
 
-/* ====================== TOASTS ====================== */
 function toast(msg,color){
   G.toasts.push({msg,color:color||'#fff',life:2.4,max:2.4});
   if(G.toasts.length>4) G.toasts.shift();
 }
 
-/* ====================== CHALLENGES ====================== */
 function makeChallenges(){
   const pool=shuffle(CHALLENGE_POOL.slice());
   return pool.slice(0,3).map(c=>({...c,prog:0,done:false}));
 }
 
-/* ====================== START ====================== */
 function startGame(){
   const mode=getMode();
   G.running=true; G.paused=false; G.over=false;
@@ -574,7 +555,6 @@ function startGame(){
   hideAllOverlays();
 }
 
-/* ====================== BIOMA / CLIMA ====================== */
 function setBiome(idx){
   G.biomeIndex=idx;
   G.biome=BIOMES[idx];
@@ -593,7 +573,6 @@ function setWeather(id,announce){
   else if(announce||id!=='clear') toast('🌦️ '+w.name, '#4cc9f0');
 }
 
-/* ====================== SPAWN ====================== */
 function laneFree(laneIdx,minDist){
   for(const t of G.traffic){
     if(Math.abs(t.x-LANES[laneIdx])<64 && t.y>-280 && t.y<minDist) return false;
@@ -675,7 +654,6 @@ function spawnDeco(yOff){
   });
 }
 
-/* ====================== PARTÍCULAS ====================== */
 function burst(x,y,n,color,spd,life){
   for(let i=0;i<n;i++){
     const a=rand(0,Math.PI*2), s=rand(spd*0.3,spd);
@@ -687,7 +665,6 @@ function burst(x,y,n,color,spd,life){
   }
 }
 
-/* ====================== COLISÃO ENTRE CARROS DO TRÁFEGO ====================== */
 function resolveTrafficOverlaps(){
   const n=G.traffic.length;
   for(let iter=0; iter<2; iter++){
@@ -717,7 +694,6 @@ function resolveTrafficOverlaps(){
   }
 }
 
-/* ====================== UPDATE ====================== */
 function update(dt){
   const car=getCar();
   const nd=getNitroDef();
@@ -971,7 +947,6 @@ function update(dt){
   }
 }
 
-/* ====================== EVENTOS ====================== */
 function destroyTraffic(tr,idx){
   burst(tr.x,tr.y,22,tr.color,300,0.7);
   burst(tr.x,tr.y,10,'#ffd60a',220,0.5);
@@ -1053,7 +1028,6 @@ function applyPowerup(type){
   }
 }
 
-/* ====================== RENDER ====================== */
 function render(){
   const dpr=Math.min(window.devicePixelRatio||1,2);
   ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -1240,7 +1214,6 @@ function drawWorld(){
   }
 }
 
-/* ---------- decoração ---------- */
 function drawDeco(d){
   const c=ctx;
   c.save();
@@ -1379,7 +1352,6 @@ function drawDeco(d){
   c.restore();
 }
 
-/* ---------- itens ---------- */
 function drawCoin(c){
   const bob=Math.sin(c.phase)*2;
   const y=c.y+bob;
@@ -1439,7 +1411,6 @@ function drawPowerup(p){
   ctx.restore();
 }
 
-/* ---------- clima ---------- */
 const rainDrops=[];
 const snowFlakes=[];
 const sandParticles=[];
@@ -1618,7 +1589,6 @@ function drawHUD(){
   }
 }
 
-/* ====================== GAME OVER ====================== */
 function gameOver(){
   G.over=true;
   G.running=false;
@@ -1651,7 +1621,6 @@ function gameOver(){
   showOverlay('over');
 }
 
-/* ====================== OVERLAYS ====================== */
 const overlays=['menu','garage','help','pause','over'];
 function hideAllOverlays(){ for(const id of overlays) document.getElementById(id).classList.add('hidden'); }
 function showOverlay(id){ hideAllOverlays(); document.getElementById(id).classList.remove('hidden'); }
@@ -1669,7 +1638,6 @@ function doPause(){
 }
 function doResume(){ G.paused=false; hideAllOverlays(); }
 
-/* ====================== LOOP ====================== */
 let last=performance.now();
 function loop(now){
   const dt=Math.min(0.05,(now-last)/1000);
@@ -1679,7 +1647,6 @@ function loop(now){
   requestAnimationFrame(loop);
 }
 
-/* ====================== MENU ====================== */
 function renderModeRow(){
   const row=document.getElementById('modeRow');
   row.innerHTML='';
@@ -1790,7 +1757,6 @@ function updateCoinDisplays(){
   document.getElementById('garageCoins').textContent=save.coins;
 }
 
-/* ====================== TABS ====================== */
 document.querySelectorAll('.tab').forEach(t=>{
   t.onclick=()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -1803,7 +1769,6 @@ document.querySelectorAll('.tab').forEach(t=>{
   };
 });
 
-/* ====================== BOTÕES ====================== */
 document.getElementById('btnPlay').onclick=()=>{ AudioSys.init(); AudioSys.ui(); G.mode=save.mode||'infinito'; startGame(); };
 document.getElementById('btnGarage').onclick=()=>{
   AudioSys.ui(); renderCarList(); renderColorGrid(); renderNitroList(); updateCoinDisplays(); showOverlay('garage');
@@ -1822,7 +1787,6 @@ document.getElementById('btnQuit').onclick=()=>{
 document.getElementById('btnRetry').onclick=()=>{ AudioSys.ui(); startGame(); };
 document.getElementById('btnMenu').onclick=()=>{ AudioSys.ui(); updateCoinDisplays(); showOverlay('menu'); };
 
-/* ====================== INICIAR ====================== */
 resize();
 renderModeRow();
 updateCoinDisplays();
