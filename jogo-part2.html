@@ -1,10 +1,22 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-<title>RoadRush 2 — 5 Pistas, Contramão e Colisões</title>
+<title>RoadRush 2 — Biomas, Temporais e Nitro</title>
+
+<!-- ===== FAVICON ===== -->
+<link rel="icon" type="image/png" sizes="32x32" href="logo.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="logo.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="logo.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="logo.png" />
+<link rel="shortcut icon" href="logo.png" />
+<meta name="theme-color" content="#05060a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="RoadRush 2" />
+<meta name="mobile-web-app-capable" content="yes" />
+
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{
@@ -30,6 +42,20 @@
     animation:hue 5s linear infinite;text-shadow:0 0 30px rgba(120,80,255,.35);
   }
   @keyframes hue{to{background-position:300% 0}}
+
+  /* Logo do menu */
+  .gameLogo{
+    width:min(320px,80vw);
+    height:auto;
+    border-radius:22px;
+    filter:drop-shadow(0 14px 40px rgba(120,80,255,.6));
+    animation:logoPulse 3.4s ease-in-out infinite;
+  }
+  @keyframes logoPulse{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.035)}
+  }
+
   .sub{margin:0;opacity:.65;font-size:13px;letter-spacing:2px;text-transform:uppercase}
   h2{margin:0 0 4px;font-size:22px;letter-spacing:2px;color:#4cc9f0}
   .btn{
@@ -118,7 +144,7 @@
   <canvas id="cv"></canvas>
 
   <div class="overlay" id="menu">
-    <h1>ROADRUSH 2</h1>
+    <img src="logo.png" alt="RoadRush 2" class="gameLogo" />
     <p class="sub">5 Pistas · Contramão · Biomas · Nitro</p>
     <div class="row" id="modeRow"></div>
     <button class="btn big" id="btnPlay">▶ JOGAR</button>
@@ -156,9 +182,9 @@
         <span class="kbd">P</span> pausa.<br><br>
         <b>Toque:</b> arraste o dedo para dirigir · botão vermelho = NITRO.<br><br>
         🛣️ <b>5 pistas</b> — bem mais espaço para manobrar!<br>
-        ⚠️ <b>Contramão</b> — modo especial com carros vindo de frente nas faixas laterais (linhas amarelas).<br>
-        🚗 <b>Colisão de tráfego</b> — os carros agora batem uns nos outros e não se sobrepõem.<br>
-        🪙 <b>Moedas</b> · 🥚 <b>Ovos</b> com recompensas · ⚡ <b>Nitro</b> com 6 tipos.<br>
+        ⚠️ <b>Contramão</b> — modo com carros vindo de frente nas faixas laterais.<br>
+        🚗 <b>Colisão de tráfego</b> — os carros batem uns nos outros e não se sobrepõem.<br>
+        🪙 <b>Moedas</b> · 🥚 <b>Ovos</b> · ⚡ <b>Nitro</b> com 6 tipos.<br>
         🌦️ <b>Temporais</b> mudam aderência/visibilidade · 🏁 <b>3 desafios</b> por corrida.
       </div>
       <button class="btn" id="btnHelpBack">◀ VOLTAR</button>
@@ -196,8 +222,6 @@
 
 /* ====================== CONSTANTES ====================== */
 const W=480, H=800;
-
-/* ---- 5 PISTAS ---- */
 const ROAD_L=52, ROAD_R=428, ROAD_W=ROAD_R-ROAD_L;
 const LANES=[
   ROAD_L+ROAD_W*0.10,
@@ -206,8 +230,7 @@ const LANES=[
   ROAD_L+ROAD_W*0.70,
   ROAD_L+ROAD_W*0.90
 ];
-const SIDE_LANES=[0,4];         // faixas laterais (contramão)
-const NORMAL_LANES=[1,2,3];     // faixas centrais
+const SIDE_LANES=[0,4];
 
 const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
 const rand=(a,b)=>a+Math.random()*(b-a);
@@ -578,14 +601,11 @@ function spawnTraffic(){
   if(!free.length) return;
   const lane=pick(free);
 
-  /* determina direção conforme o modo */
   let oncoming;
   if(mode.id==='contramao'){
-    /* nas laterais vêm de frente, no meio é normal */
     if(SIDE_LANES.includes(lane)) oncoming=true;
     else oncoming=false;
   } else {
-    /* modos comuns: chance pequena de contramão aleatória */
     oncoming = Math.random() < 0.22;
   }
 
@@ -660,9 +680,7 @@ function burst(x,y,n,color,spd,life){
   }
 }
 
-/* ====================== COLISÃO ENTRE CARROS DO TRÁFEGO ======================
-   Garante que nenhum carro passe por cima do outro. Empurra no eixo Y
-   (e um pouco no X quando vão no mesmo sentido), com 2 iterações p/ estabilidade. */
+/* ====================== COLISÃO ENTRE CARROS DO TRÁFEGO ====================== */
 function resolveTrafficOverlaps(){
   const n=G.traffic.length;
   for(let iter=0; iter<2; iter++){
@@ -675,18 +693,15 @@ function resolveTrafficOverlaps(){
         const dx=Math.abs(a.x-b.x);
         const dy=Math.abs(a.y-b.y);
         if(dx<hx && dy<hy){
-          /* resolve primeiro em Y (empurra para os lados contrários) */
           const oy=hy-dy;
           if(a.y<b.y){ a.y-=oy*0.5; b.y+=oy*0.5; }
           else       { a.y+=oy*0.5; b.y-=oy*0.5; }
 
-          /* se vão no mesmo sentido, também separa um pouco em X pra não empilhar */
           if(a.oncoming===b.oncoming){
             const ox=hx-dx;
             if(a.x<b.x){ a.x-=ox*0.35; b.x+=ox*0.35; }
             else       { a.x+=ox*0.35; b.x-=ox*0.35; }
           }
-          /* clamp nas bordas da pista */
           a.x=clamp(a.x, ROAD_L+a.w/2+2, ROAD_R-a.w/2-2);
           b.x=clamp(b.x, ROAD_L+b.w/2+2, ROAD_R-b.w/2-2);
         }
@@ -705,12 +720,10 @@ function update(dt){
   G.t+=dt;
   G.stats.noHit+=dt;
 
-  /* velocidade */
   const targetBase=(330+Math.min(G.dist*0.055,500))*car.spd;
   G.speed+=(targetBase-G.speed)*Math.min(1,dt*1.1);
   if(G.speed<80) G.speed=80;
 
-  /* nitro */
   const wantNitro=keys.nitro||touchNitro;
   if(G.nitroLock>0) G.nitroLock-=dt;
   if(wantNitro && !G.nitroOn && G.nitro>18 && G.nitroLock<=0){
@@ -734,12 +747,10 @@ function update(dt){
   if(G.shieldTime>0) G.shieldTime-=dt;
   if(G.magnetTime>0) G.magnetTime-=dt;
 
-  /* vento */
   if(wx.wind>0){
     G.windGust=Math.sin(G.t*0.7)*wx.wind*38 + Math.sin(G.t*2.3)*wx.wind*22;
   } else G.windGust=lerp(G.windGust,0,dt*3);
 
-  /* relâmpagos */
   if(wx.lightning && Math.random()<dt*0.35){
     G.lightning=1;
     G.flash=0.6;
@@ -749,21 +760,18 @@ function update(dt){
   if(G.lightning>0) G.lightning-=dt*2.5;
   if(G.flash>0) G.flash-=dt*1.6;
 
-  /* scroll + pontos */
   const screenSpeed=G.speed*boost;
   G.scroll+=screenSpeed*dt;
   G.dist+=screenSpeed*dt/10;
   G.stats.distKm=G.dist/1000;
   G.score+=screenSpeed*dt*0.05*mode.scoreMul;
 
-  /* bioma */
   G.biomeTimer+=dt;
   const biomeLen=mode.id==='ghost'?520:760;
   if(G.dist>(G.biomeIndex+1)*biomeLen){
     setBiome((G.biomeIndex+1)%BIOMES.length);
   }
 
-  /* clima */
   G.weatherTimer-=dt;
   if(G.weatherTimer<=0 && mode.id!=='storm'){
     const list=G.biome.weathers;
@@ -773,7 +781,6 @@ function update(dt){
     G.weatherTimer=rand(22,42);
   }
 
-  /* player movimento */
   const grip=wx.grip*car.grip;
   let ax=0;
   if(keys.left) ax-=1;
@@ -818,7 +825,6 @@ function update(dt){
     if(G.comboTimer<=0) G.combo=0;
   }
 
-  /* deco */
   G.decoTimer-=dt;
   if(G.decoTimer<=0){
     spawnDeco();
@@ -830,7 +836,6 @@ function update(dt){
     if(d.y>H+220) G.decos.splice(i,1);
   }
 
-  /* tráfego */
   G.spawnTimer-=dt;
   if(G.spawnTimer<=0){
     spawnTraffic();
@@ -839,7 +844,6 @@ function update(dt){
     G.spawnTimer=Math.max(0.14, gap/Math.max(180,screenSpeed));
   }
 
-  /* ---- 1) MOVER TODO O TRÁFEGO ---- */
   for(const tr of G.traffic){
     const sv=tr.oncoming ? (screenSpeed+tr.spd) : (screenSpeed-tr.spd);
     tr.y+=sv*dt;
@@ -847,10 +851,8 @@ function update(dt){
     tr.x+=Math.sin(tr.wob)*8*dt;
   }
 
-  /* ---- 2) RESOLVER COLISÕES ENTRE CARROS DO TRÁFEGO ---- */
   resolveTrafficOverlaps();
 
-  /* ---- 3) COLISÃO COM PLAYER + SCORE + LIMPEZA ---- */
   for(let i=G.traffic.length-1;i>=0;i--){
     const tr=G.traffic[i];
     const dx=Math.abs(tr.x-G.player.x);
@@ -864,9 +866,7 @@ function update(dt){
         destroyTraffic(tr,i);
         continue;
       } else if(G.nitroOn && nd.ghost){
-        /* atravessa */
       } else if(G.invuln>0){
-        /* ignora */
       } else {
         crash(tr,i);
         continue;
@@ -883,7 +883,6 @@ function update(dt){
     if(tr.y>H+200 || tr.y<-400) G.traffic.splice(i,1);
   }
 
-  /* moedas */
   G.coinTimer-=dt;
   if(G.coinTimer<=0){
     spawnCoins();
@@ -908,7 +907,6 @@ function update(dt){
     if(c.y>H+80) G.coins.splice(i,1);
   }
 
-  /* ovos */
   G.eggTimer-=dt*mode.eggMul;
   if(G.eggTimer<=0){ spawnEgg(); G.eggTimer=rand(20,42); }
   for(let i=G.eggs.length-1;i>=0;i--){
@@ -924,7 +922,6 @@ function update(dt){
     if(e.y>H+80) G.eggs.splice(i,1);
   }
 
-  /* powerups */
   G.puTimer-=dt;
   if(G.puTimer<=0){ spawnPowerup(); G.puTimer=rand(13,26); }
   for(let i=G.powerups.length-1;i>=0;i--){
@@ -939,7 +936,6 @@ function update(dt){
     if(p.y>H+80) G.powerups.splice(i,1);
   }
 
-  /* partículas */
   for(let i=G.particles.length-1;i>=0;i--){
     const p=G.particles[i];
     p.x+=p.vx*dt; p.y+=p.vy*dt;
@@ -948,13 +944,11 @@ function update(dt){
     if(p.life<=0) G.particles.splice(i,1);
   }
 
-  /* toasts */
   for(let i=G.toasts.length-1;i>=0;i--){
     G.toasts[i].life-=dt;
     if(G.toasts[i].life<=0) G.toasts.splice(i,1);
   }
 
-  /* desafios */
   for(const ch of G.challenges){
     if(ch.done) continue;
     const val=G.stats[ch.stat]||0;
@@ -1083,7 +1077,6 @@ function drawWorld(){
   const wx=G.weather;
   const isContramao = (G.mode==='contramao');
 
-  /* chão */
   const gg=ctx.createLinearGradient(0,0,0,H);
   gg.addColorStop(0,b.ground2);
   gg.addColorStop(0.5,b.ground);
@@ -1097,10 +1090,8 @@ function drawWorld(){
     ctx.fillRect(0,y,W,70);
   }
 
-  /* deco de trás */
   for(const d of G.decos) if(d.side<0) drawDeco(d);
 
-  /* estrada */
   const rg=ctx.createLinearGradient(ROAD_L,0,ROAD_R,0);
   rg.addColorStop(0,shade(b.road,-0.12));
   rg.addColorStop(0.5,b.road);
@@ -1108,14 +1099,12 @@ function drawWorld(){
   ctx.fillStyle=rg;
   ctx.fillRect(ROAD_L,0,ROAD_W,H);
 
-  /* faixa vermelha indicando zona de contramão (nas laterais) */
   if(isContramao){
     ctx.fillStyle='rgba(200,30,40,.14)';
     ctx.fillRect(ROAD_L,0,ROAD_W*0.20,H);
     ctx.fillRect(ROAD_L+ROAD_W*0.80,0,ROAD_W*0.20,H);
   }
 
-  /* textura */
   ctx.globalAlpha=0.06;
   ctx.fillStyle='#000';
   const texP=60, texO=G.scroll%texP;
@@ -1124,7 +1113,6 @@ function drawWorld(){
   }
   ctx.globalAlpha=1;
 
-  /* bordas */
   ctx.fillStyle=b.edge;
   ctx.fillRect(ROAD_L-7,0,7,H);
   ctx.fillRect(ROAD_R,0,7,H);
@@ -1132,13 +1120,10 @@ function drawWorld(){
   ctx.fillRect(ROAD_L-7,0,2,H);
   ctx.fillRect(ROAD_R+5,0,2,H);
 
-  /* ---- LINHAS DAS 5 PISTAS ---- */
-  /* linhas amarelas duplas nas bordas da zona contramão */
   const yl = isContramao ? '#ffd60a' : b.line;
   const dashH=46, gapD=46, period=dashH+gapD;
   const off=G.scroll%period;
 
-  /* divisórias 0.2, 0.4, 0.6, 0.8 */
   const dividers=[
     {x:ROAD_L+ROAD_W*0.20, solid:isContramao},
     {x:ROAD_L+ROAD_W*0.40, solid:false},
@@ -1148,7 +1133,6 @@ function drawWorld(){
   for(const d of dividers){
     ctx.fillStyle = d.solid ? yl : b.line;
     if(d.solid){
-      /* linha sólida dupla (contramão) */
       ctx.fillRect(d.x-3,0,2.5,H);
       ctx.fillRect(d.x+0.5,0,2.5,H);
     } else {
@@ -1158,19 +1142,12 @@ function drawWorld(){
     }
   }
 
-  /* deco da frente */
   for(const d of G.decos) if(d.side>0) drawDeco(d);
 
-  /* powerups */
   for(const p of G.powerups) drawPowerup(p);
-
-  /* moedas */
   for(const c of G.coins) drawCoin(c);
-
-  /* ovos */
   for(const e of G.eggs) drawEgg(e);
 
-  /* tráfego */
   for(const t of G.traffic){
     const lightsOn=G.biome.id==='neon'||G.weather.id==='storm'||G.weather.id==='fog'||G.weather.id==='rain';
     drawCarTop(ctx,t.x,t.y,t.w,t.h,t.color,{
@@ -1185,7 +1162,6 @@ function drawWorld(){
     }
   }
 
-  /* player */
   const car=getCar();
   const blink=G.invuln>0 && Math.floor(G.t*14)%2===0;
   if(!blink || G.invuln<=0){
@@ -1235,7 +1211,6 @@ function drawWorld(){
     }
   }
 
-  /* partículas */
   for(const p of G.particles){
     const a=clamp(p.life/p.max,0,1);
     ctx.globalAlpha=a;
@@ -1628,7 +1603,6 @@ function drawHUD(){
     ctx.fillRect(0,74,W,3);
   }
 
-  /* aviso de contramão */
   if(G.mode==='contramao' && Math.sin(G.t*4)>0.7){
     ctx.fillStyle='rgba(255,60,60,.85)';
     ctx.font='bold 13px system-ui,sans-serif';
